@@ -179,6 +179,7 @@ const AdminPage = () => {
     
     
     
+    
 
     const handleUpdateSubmit = (e) => {
         e.preventDefault();
@@ -217,7 +218,7 @@ const AdminPage = () => {
         const bookingToDelete = confirmedBookings.find(booking => booking._id === id);
         if (!bookingToDelete) return;
     
-        const { indate, outdate, singleRooms } = bookingToDelete;
+        const { indate, outdate, singleRooms, option } = bookingToDelete;
     
         axios.delete(`https://vivian-garden-back.vercel.app/api/confirmedBookings/${id}`)
             .then(() => {
@@ -228,19 +229,32 @@ const AdminPage = () => {
                 const endDate = new Date(outdate);
                 endDate.setDate(endDate.getDate() - 1); // Exclude the check-out date
     
+                let roomsToRestore = { singleRooms: 0, groupRooms: 0 };
+    
+                if (option === 'Phòng Lẻ') {
+                    roomsToRestore.singleRooms = singleRooms;
+                } else if (option === '6 Phòng') {
+                    roomsToRestore.singleRooms = 5;
+                    roomsToRestore.groupRooms = 1;
+                } else if (option === 'Nguyên Căn') {
+                    roomsToRestore.singleRooms = 5;
+                    roomsToRestore.groupRooms = 2;
+                }
+    
                 while (currentDate <= endDate) {
                     const dateString = currentDate.toISOString().split('T')[0];
     
                     // Find the availability record for this date
                     const availabilityRecord = availability.find(avail => avail.date === dateString);
                     if (availabilityRecord) {
-                        // Update the number of single rooms
-                        availabilityRecord.singleRooms += singleRooms;
+                        // Update the number of single and group rooms
+                        availabilityRecord.singleRooms += roomsToRestore.singleRooms;
+                        availabilityRecord.groupRooms += roomsToRestore.groupRooms;
     
                         // Make the PUT request to update the availability in the backend
                         axios.put(`https://vivian-garden-back.vercel.app/api/availability/${dateString}`, {
                             singleRooms: availabilityRecord.singleRooms,
-                            groupRooms: availabilityRecord.groupRooms, // Assuming group rooms stay the same
+                            groupRooms: availabilityRecord.groupRooms,
                         }).then(response => {
                             console.log('Availability updated successfully:', response.data);
                         }).catch(error => {
@@ -256,8 +270,7 @@ const AdminPage = () => {
                 axios.get('https://vivian-garden-back.vercel.app/api/availability')
                     .then(response => {
                         setAvailability(response.data || []);
-                        window.location.reload()
-
+                        window.location.reload();
                     }).catch(error => {
                         console.error("There was an error fetching the availability!", error);
                     });
@@ -265,9 +278,8 @@ const AdminPage = () => {
             .catch(error => {
                 console.error('Error deleting confirmed booking:', error);
             });
-
     };
-
+    
     const handleChange = (e) => {
         const { name, value } = e.target;
         if (value === 'Phòng Lẻ') {
