@@ -178,9 +178,6 @@ const AdminPage = () => {
     };
     
     
-    
-    
-
     const handleUpdateSubmit = (e) => {
         e.preventDefault();
         if (bookingToUpdate) {
@@ -331,6 +328,7 @@ const AdminPage = () => {
                         <th>Name</th>
                         <th>Check In</th>
                         <th>Check Out</th>
+                        <th>Option</th>
                         <th>People</th>
                         <th>Actions</th>
                     </tr>
@@ -341,6 +339,7 @@ const AdminPage = () => {
                             <td>{booking.name}</td>
                             <td>{booking.indate}</td>
                             <td>{booking.outdate}</td>
+                            <td>{booking.option}</td>
                             <td>{booking.people}</td>
                             <td>
                                 <button className="btn btn-warning" onClick={() => handleUpdateClick(booking)}>Update</button>
